@@ -392,21 +392,27 @@
         <div style="font-size:0.85rem; color:var(--text-muted);" id="resultMeta"></div>
       </div>
 
-      <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(30, 41, 59, 0.4); border: 1px dashed var(--border); border-radius: 12px;">
-        <div style="font-size: 0.85rem; font-weight: 700; color: #60A5FA; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
-          <span>🛡️ Cloudflare or Bot Protected Demo? Use 1-Tap Browser Scanner</span>
+      <div style="margin-top: 1.5rem; padding: 1.25rem; background: rgba(30, 41, 59, 0.4); border: 1px dashed var(--border); border-radius: 12px;">
+        <div style="font-size: 0.9rem; font-weight: 700; color: #60A5FA; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span>🌟 Option A: Live Demo 1-Click Visual Extractor (Bookmarklet)</span>
         </div>
-        <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; margin: 0 0 0.75rem 0;">
-          If a ThemeForest site blocks automated server scraping with Captcha or Cloudflare, open the site in your browser on any device (phone, tablet, or laptop), and click this bookmarklet:
+        <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 0.75rem 0;">
+          Works on any protected site (ThemeForest, Envato, Wix, etc.). Drag this button to your Bookmarks Bar, or click it when visiting any live demo. It scans live computed CSS, geometry, and cards directly in your browser and instantly downloads the native Elementor Flexbox JSON:
         </p>
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <a href="javascript:(function(){const t=document.title||'Scanned Template';const h=document.documentElement.outerHTML;alert('⚡ Theme2Builder: Capturing live layout for '+t+'...');fetch('https://theme-to-builder-converter.vercel.app/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:h,builder:'elementor',title:t})}).then(r=>r.json()).then(d=>{if(d.success){const b=new Blob([JSON.stringify(d.template,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='elementor-'+t.replace(/[^a-zA-Z0-9]/g,'_')+'.json';a.click();alert('✅ Downloaded Elementor Template JSON!');}else{alert('Error: '+d.error);}}).catch(e=>alert('Error: '+e.message));})();" style="display: inline-block; background: #2563EB; color: #FFFFFF; font-size: 0.8rem; font-weight: 700; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; border: 1px solid #3B82F6;" title="Drag to bookmarks bar or tap">
-            ⭐ 1-Tap Scanner Bookmarklet (Drag to Bookmarks)
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+          <a href="javascript:(function(){const s=document.createElement('script');s.src='https://theme-to-builder-converter.vercel.app/visual-scanner-client.js?v='+Date.now();s.onload=function(){alert('⚡ Theme2Builder: Analyzing visual geometry & computed styles...');try{const t=window.Theme2BuilderScanner.scan(document,window);const b=new Blob([JSON.stringify(t,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);const fn=(t.title||'elementor-template').toLowerCase().replace(/[^a-z0-9]/g,'-')+'.json';a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);alert('✅ Downloaded 100% Native Elementor Flexbox Template ('+t.content.length+' sections)!');}catch(e){alert('Scanner error: '+e.message);}};s.onerror=function(){alert('Failed to load visual scanner script.');};document.body.appendChild(s);})();" style="display: inline-block; background: #2563EB; color: #FFFFFF; font-size: 0.85rem; font-weight: 700; padding: 0.6rem 1.25rem; border-radius: 8px; text-decoration: none; border: 1px solid #3B82F6; cursor: grab;" title="Drag to bookmarks bar or tap">
+            ⭐ 1-Click Elementor Extractor (Drag to Bookmarks)
           </a>
+          <button type="button" id="copyBookmarkletBtn" style="background: rgba(59, 130, 246, 0.15); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.3); padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+            📋 Copy Script for Console
+          </button>
         </div>
       </div>
     </div>
   </main>
+
+  <iframe id="sandboxFrame" style="position: fixed; width: 1440px; height: 900px; left: -9999px; top: -9999px; visibility: hidden; pointer-events: none;"></iframe>
+  <script src="/visual-scanner-client.js"></script>
 
   <footer>
     Theme2Builder &copy; 2026 · Built for autonomous WordPress conversion across all devices.
@@ -591,31 +597,55 @@
       }
 
       convertBtn.disabled = true;
-      convertBtn.innerHTML = '<span>Converting Template...</span>';
+      convertBtn.innerHTML = '<span>Rendering in Browser & Computing Styles...</span>';
       resultBox.style.display = 'none';
 
       try {
-        const response = await fetch('/api', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            html: htmlContent,
-            builder: currentBuilder,
-            title: selectedFile ? selectedFile.name.replace(/\.[^/.]+$/, '') : 'Theme Template'
-          })
-        });
+        let templateResult = null;
 
-        const data = await response.json();
+        // Try In-Browser Visual Sandbox if Elementor is targeted
+        if (currentBuilder === 'elementor' && window.Theme2BuilderScanner) {
+          try {
+            const sandbox = document.getElementById('sandboxFrame');
+            sandbox.srcdoc = htmlContent;
+            await new Promise(resolve => setTimeout(resolve, 600)); // Allow styles and DOM to compute
 
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || 'Conversion failed');
+            if (sandbox.contentDocument && sandbox.contentDocument.body) {
+              const scanned = window.Theme2BuilderScanner.scan(sandbox.contentDocument, sandbox.contentWindow);
+              if (scanned && scanned.content && scanned.content.length > 0) {
+                templateResult = scanned;
+                console.log('[Theme2Builder] Successfully computed styles via in-browser sandbox!');
+              }
+            }
+          } catch (sandboxErr) {
+            console.warn('[Theme2Builder] Sandbox fallback to API:', sandboxErr);
+          }
         }
 
-        convertedJson = data.template;
-        const count = currentBuilder === 'elementor' ? data.template.content.length : data.template.data.length;
+        // Fallback to Server API if sandbox did not produce template
+        if (!templateResult) {
+          const response = await fetch('/api', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              html: htmlContent,
+              builder: currentBuilder,
+              title: selectedFile ? selectedFile.name.replace(/\.[^/.]+$/, '') : 'Theme Template'
+            })
+          });
+
+          const data = await response.json();
+          if (!response.ok || !data.success) {
+            throw new Error(data.error || 'Conversion failed');
+          }
+          templateResult = data.template;
+        }
+
+        convertedJson = templateResult;
+        const count = currentBuilder === 'elementor' ? templateResult.content.length : templateResult.data.length;
 
         resultSummary.textContent = `Template Converted Successfully!`;
-        resultMeta.textContent = `Generated ${count} root ${currentBuilder === 'elementor' ? 'Flexbox containers' : 'Divi sections'} in 100% native format. Ready for import.`;
+        resultMeta.textContent = `Generated ${count} root ${currentBuilder === 'elementor' ? 'Flexbox containers' : 'Divi sections'} with 100% computed styling and geometry.`;
         resultBox.style.display = 'block';
       } catch (err) {
         alert('Error: ' + err.message);
@@ -623,6 +653,16 @@
         convertBtn.disabled = false;
         convertBtn.innerHTML = '<span>Convert to Template</span><span>→</span>';
       }
+    });
+
+    // Copy Bookmarklet Snippet
+    document.getElementById('copyBookmarkletBtn').addEventListener('click', () => {
+      const code = `(function(){const s=document.createElement('script');s.src='https://theme-to-builder-converter.vercel.app/visual-scanner-client.js?v='+Date.now();s.onload=function(){alert('⚡ Theme2Builder: Analyzing visual geometry & computed styles...');try{const t=window.Theme2BuilderScanner.scan(document,window);const b=new Blob([JSON.stringify(t,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);const fn=(t.title||'elementor-template').toLowerCase().replace(/[^a-z0-9]/g,'-')+'.json';a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);alert('✅ Downloaded 100% Native Elementor Flexbox Template ('+t.content.length+' sections)!');}catch(e){alert('Scanner error: '+e.message);}};s.onerror=function(){alert('Failed to load visual scanner script.');};document.body.appendChild(s);})();`;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('📋 Copied 1-Click Scanner code! You can paste it into Chrome DevTools Console on any live ThemeForest demo to extract the Elementor template instantly.');
+      }).catch(() => {
+        prompt('Copy this code:', code);
+      });
     });
 
     // Download JSON
