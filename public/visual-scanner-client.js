@@ -1,7 +1,7 @@
 /**
- * Theme2Builder - Universal In-Browser Visual Geometry Engine
+ * Theme2Builder - Universal In-Browser Visual Geometry Engine (Compact High-Fidelity)
  * Zero AI Cost · 100% Native Elementor Flexbox JSON Compiler
- * Recursively analyzes live rendered CSS, DOM geometry, and multi-column flex grids.
+ * Automatically flattens wrapper hell and snaps columns into tight, beautiful Flexbox rows.
  */
 
 window.Theme2BuilderScanner = {
@@ -33,7 +33,7 @@ window.Theme2BuilderScanner = {
       return el.textContent ? el.textContent.trim().replace(/\s+/g, ' ') : '';
     }
 
-    // 1. Discover all root sections
+    // 1. Discover all structural page sections
     const rootNodes = [];
 
     // Header
@@ -85,7 +85,7 @@ window.Theme2BuilderScanner = {
       const secEl = node.el;
       const s = win.getComputedStyle(secEl);
 
-      // Section Background Extraction (Inspect self and prominent children)
+      // Extract section background
       let bgColor = parseColor(s.backgroundColor);
       let bgImg = parseBgImage(s.backgroundImage);
 
@@ -139,17 +139,19 @@ window.Theme2BuilderScanner = {
       const innerContainer = {
         id: generateId(),
         elType: 'container',
+        isInner: true,
         settings: {
+          container_type: 'flex',
           content_width: 'boxed',
           boxed_width: { unit: 'px', size: 1200 },
           flex_direction: 'column',
-          gap: { unit: 'px', size: 24 }
+          gap: { unit: 'px', size: 28 }
         },
         elements: []
       };
 
-      // Unroll wrappers down to meaningful rows/grids
-      parseSubtreeRecursive(secEl, innerContainer, win, parseColor, parseBgImage, generateId, getCleanText);
+      // Extract section layout using clean visual rows and cards
+      compileSectionLayout(secEl, innerContainer, win, parseColor, parseBgImage, generateId, getCleanText);
 
       if (innerContainer.elements.length > 0) {
         rootContainer.elements.push(innerContainer);
@@ -166,189 +168,116 @@ window.Theme2BuilderScanner = {
   }
 };
 
-function parseSubtreeRecursive(node, targetContainer, win, parseColor, parseBgImage, generateId, getCleanText) {
+function compileSectionLayout(secEl, innerContainer, win, parseColor, parseBgImage, generateId, getCleanText) {
   // If carousel/slider, target the active slide
-  if (node.classList.contains('swiper-container') || node.querySelector('.swiper-wrapper')) {
-    const activeSlide = node.querySelector('.swiper-slide:not(.swiper-slide-duplicate)') || node.querySelector('.swiper-slide');
-    if (activeSlide) {
-      parseSubtreeRecursive(activeSlide, targetContainer, win, parseColor, parseBgImage, generateId, getCleanText);
-      return;
+  let targetRoot = secEl;
+  if (secEl.querySelector('.swiper-slide')) {
+    targetRoot = secEl.querySelector('.swiper-slide:not(.swiper-slide-duplicate)') || secEl.querySelector('.swiper-slide') || secEl;
+  }
+
+  // 1. Find section title / heading block at the top if present
+  const sectionTitleBlock = targetRoot.querySelector('.sec-title, .title-box, [class*="section-title"], [class*="_title"], [class*="-title"]');
+  if (sectionTitleBlock) {
+    const titleWidgets = extractWidgetsFromContainer(sectionTitleBlock, win, parseColor, generateId, getCleanText);
+    if (titleWidgets.length > 0) {
+      const titleWrap = {
+        id: generateId(),
+        elType: 'container',
+        isInner: true,
+        settings: {
+          container_type: 'flex',
+          content_width: 'full',
+          flex_direction: 'column',
+          align_items: 'center',
+          gap: { unit: 'px', size: 8 }
+        },
+        elements: titleWidgets
+      };
+      innerContainer.elements.push(titleWrap);
     }
   }
 
-  // Filter valid visual children (exclude absolute background patterns with no text/images)
-  const children = Array.from(node.children).filter(c => {
-    const s = win.getComputedStyle(c);
-    if (s.display === 'none' || s.visibility === 'hidden' || c.offsetHeight < 5) return false;
-    // Skip background pattern divs
-    if (s.position === 'absolute' && !c.querySelector('img, h1, h2, h3, h4, h5, h6, p, a, button')) {
-      return false;
-    }
-    return true;
+  // 2. Find all grid rows or multi-column containers
+  const rows = targetRoot.querySelectorAll('.row, [class*="services-"], [class*="team-"], [class*="case-"], [class*="process-"]');
+  const validRows = Array.from(rows).filter(r => {
+    // Has multiple direct children or col-* children
+    const cols = r.querySelectorAll(':scope > [class*="col-"], :scope > [class*="block"], :scope > [class*="item"]');
+    return cols.length > 1 && win.getComputedStyle(r).display !== 'none';
   });
 
-  if (children.length === 0) return;
+  if (validRows.length > 0) {
+    for (const r of validRows) {
+      const colElements = Array.from(r.querySelectorAll(':scope > [class*="col-"], :scope > [class*="block"], :scope > [class*="item"]'));
+      if (colElements.length === 0) continue;
 
-  // Check if this node is a single wrapper (e.g. .elementor-widget, .container, .row)
-  if (children.length === 1 && !checkIsVisualCard(children[0], win.getComputedStyle(children[0]), parseColor)) {
-    parseSubtreeRecursive(children[0], targetContainer, win, parseColor, parseBgImage, generateId, getCleanText);
-    return;
-  }
-
-  // Check if this container is a multi-column row (e.g. .row, display: flex, or multiple columns)
-  const nodeStyle = win.getComputedStyle(node);
-  const isRowContainer = node.classList.contains('row') || nodeStyle.display === 'flex' || children.some(c => c.className.includes('col-'));
-
-  if (isRowContainer && children.length > 1) {
-    // Treat all children as flex columns in a row
-    const rowContainer = {
-      id: generateId(),
-      elType: 'container',
-      settings: {
-        content_width: 'full',
-        flex_direction: 'row',
-        flex_wrap: 'wrap',
-        justify_content: 'space-between',
-        align_items: 'stretch',
-        gap: { unit: 'px', size: 24 },
-        width: { unit: '%', size: 100 }
-      },
-      elements: []
-    };
-
-    const parentWidth = node.getBoundingClientRect().width || 1200;
-
-    for (const colItem of children) {
-      const colRect = colItem.getBoundingClientRect();
-      let colPercent = calculateColumnWidth(colItem, colRect.width, parentWidth);
-
-      const colContainer = buildFlexContainer(colItem, colPercent, win, parseColor, parseBgImage, generateId, getCleanText);
-      rowContainer.elements.push(colContainer);
-    }
-    targetContainer.elements.push(rowContainer);
-    return;
-  }
-
-  // Otherwise group children by horizontal rows based on top coordinate
-  const rows = groupChildrenIntoRows(children, win);
-
-  for (const row of rows) {
-    if (row.length > 1) {
       const rowContainer = {
         id: generateId(),
         elType: 'container',
+        isInner: true,
         settings: {
+          container_type: 'flex',
           content_width: 'full',
           flex_direction: 'row',
           flex_wrap: 'wrap',
           justify_content: 'space-between',
           align_items: 'stretch',
           gap: { unit: 'px', size: 24 },
-          width: { unit: '%', size: 100 }
+          width: { unit: '%', size: 100 },
+          custom_css: 'selector { display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; width: 100% !important; }'
         },
         elements: []
       };
 
-      const parentWidth = node.getBoundingClientRect().width || 1200;
+      const colCount = colElements.length;
+      let widthPercent = 31;
+      if (colCount === 2) widthPercent = 48;
+      else if (colCount === 4) widthPercent = 23;
+      else if (colCount >= 3) widthPercent = 31; // 3 per row (e.g. 3 cards or 6 cards in 3x2)
 
-      for (const colItem of row) {
-        const colRect = colItem.getBoundingClientRect();
-        let colPercent = calculateColumnWidth(colItem, colRect.width, parentWidth);
+      for (const col of colElements) {
+        // Specific class overrides
+        let actualWidth = widthPercent;
+        if (col.className.includes('col-lg-5')) actualWidth = 40;
+        else if (col.className.includes('col-lg-7')) actualWidth = 58;
+        else if (col.className.includes('col-lg-8')) actualWidth = 64;
+        else if (col.className.includes('col-lg-4')) actualWidth = 31;
+        else if (col.className.includes('col-lg-6')) actualWidth = 48;
 
-        const colContainer = buildFlexContainer(colItem, colPercent, win, parseColor, parseBgImage, generateId, getCleanText);
+        const colContainer = compileColumnOrCard(col, actualWidth, win, parseColor, parseBgImage, generateId, getCleanText);
         rowContainer.elements.push(colContainer);
       }
-      targetContainer.elements.push(rowContainer);
-    } else {
-      const single = row[0];
-      const s = win.getComputedStyle(single);
-      const isCard = checkIsVisualCard(single, s, parseColor);
-
-      if (isCard) {
-        const colContainer = buildFlexContainer(single, 100, win, parseColor, parseBgImage, generateId, getCleanText);
-        targetContainer.elements.push(colContainer);
-      } else {
-        const leafWidget = buildLeafWidget(single, s, single.getBoundingClientRect(), win, parseColor, generateId, getCleanText);
-        if (leafWidget) {
-          targetContainer.elements.push(leafWidget);
-        } else if (single.children.length > 0) {
-          parseSubtreeRecursive(single, targetContainer, win, parseColor, parseBgImage, generateId, getCleanText);
-        }
-      }
+      innerContainer.elements.push(rowContainer);
     }
+  } else {
+    // If no .row, use generic visual row groupings
+    parseGenericBranch(targetRoot, innerContainer, win, parseColor, parseBgImage, generateId, getCleanText);
   }
 }
 
-function calculateColumnWidth(el, widthPx, parentWidthPx) {
-  const cls = el.className || '';
-  if (cls.includes('col-lg-4') || cls.includes('col-md-4')) return 31;
-  if (cls.includes('col-lg-6') || cls.includes('col-md-6')) return 48;
-  if (cls.includes('col-lg-3') || cls.includes('col-md-3')) return 23;
-  if (cls.includes('col-lg-8') || cls.includes('col-md-8')) return 64;
-  if (cls.includes('col-lg-7') || cls.includes('col-md-7')) return 56;
-  if (cls.includes('col-lg-5') || cls.includes('col-md-5')) return 40;
-  if (cls.includes('col-lg-12') || cls.includes('col-md-12')) return 100;
-
-  const ratio = widthPx / (parentWidthPx || 1200);
-  if (ratio >= 0.28 && ratio <= 0.38) return 31;
-  if (ratio >= 0.44 && ratio <= 0.56) return 48;
-  if (ratio >= 0.20 && ratio <= 0.27) return 23;
-  if (ratio >= 0.60 && ratio <= 0.70) return 64;
-  return Math.min(100, Math.max(15, Math.round(ratio * 100)));
-}
-
-function groupChildrenIntoRows(elements, win) {
-  const rows = [];
-  let currentRow = [];
-
-  for (let i = 0; i < elements.length; i++) {
-    const el = elements[i];
-    const rect = el.getBoundingClientRect();
-
-    if (currentRow.length === 0) {
-      currentRow.push(el);
-    } else {
-      const prev = currentRow[currentRow.length - 1];
-      const prevRect = prev.getBoundingClientRect();
-
-      if (Math.abs(rect.top - prevRect.top) < 30 && rect.left > prevRect.left) {
-        currentRow.push(el);
-      } else {
-        rows.push(currentRow);
-        currentRow = [el];
-      }
-    }
-  }
-  if (currentRow.length > 0) rows.push(currentRow);
-  return rows;
-}
-
-function checkIsVisualCard(el, s, parseColor) {
+function compileColumnOrCard(colEl, widthPercent, win, parseColor, parseBgImage, generateId, getCleanText) {
+  const s = win.getComputedStyle(colEl);
   const bg = parseColor(s.backgroundColor);
   const br = parseInt(s.borderRadius) || 0;
   const shadow = s.boxShadow && s.boxShadow !== 'none';
-  const border = parseInt(s.borderWidth) > 0;
-  const isBlock = el.className.includes('card') || el.className.includes('block') || el.className.includes('item') || el.className.includes('box');
-  return (bg && bg !== 'transparent') || br >= 6 || shadow || border || (isBlock && el.children.length > 1);
-}
 
-function buildFlexContainer(el, widthPercent, win, parseColor, parseBgImage, generateId, getCleanText) {
-  const s = win.getComputedStyle(el);
-  const rect = el.getBoundingClientRect();
-  const bg = parseColor(s.backgroundColor);
-  const bgImg = parseBgImage(s.backgroundImage);
-  const br = parseInt(s.borderRadius) || 0;
-  const pTop = parseInt(s.paddingTop) || 0;
-  const pBottom = parseInt(s.paddingBottom) || 0;
-  const pLeft = parseInt(s.paddingLeft) || 0;
-  const pRight = parseInt(s.paddingRight) || 0;
+  // Check if this column acts as a card
+  const innerCard = colEl.querySelector('[class*="inner"], [class*="box"], [class*="single"], .card') || colEl;
+  const ics = win.getComputedStyle(innerCard);
+  const cardBg = parseColor(ics.backgroundColor) || bg;
+  const cardBr = parseInt(ics.borderRadius) || br;
+  const hasCardStyling = (cardBg && cardBg !== 'transparent') || cardBr >= 6 || (ics.boxShadow && ics.boxShadow !== 'none');
 
   const container = {
     id: generateId(),
     elType: 'container',
+    isInner: true,
     settings: {
+      container_type: 'flex',
+      content_width: 'full',
       flex_direction: 'column',
       width: { unit: '%', size: widthPercent },
+      _element_custom_width: { unit: '%', size: widthPercent },
+      custom_css: `selector { width: ${widthPercent}% !important; max-width: ${widthPercent}% !important; flex: 0 0 ${widthPercent}% !important; }`,
       flex_grow: 0,
       flex_shrink: 0,
       gap: { unit: 'px', size: 16 }
@@ -356,84 +285,51 @@ function buildFlexContainer(el, widthPercent, win, parseColor, parseBgImage, gen
     elements: []
   };
 
-  if (bg && bg !== 'transparent') {
-    container.settings.background_background = 'classic';
-    container.settings.background_color = bg;
-  }
-  if (bgImg) {
-    container.settings.background_background = 'classic';
-    container.settings.background_image = { url: bgImg, id: '' };
-    container.settings.background_size = 'cover';
-  }
-  if (br > 0) {
-    container.settings.border_radius = { unit: 'px', top: br, right: br, bottom: br, left: br };
-  }
-  if (pTop || pBottom || pLeft || pRight) {
+  if (hasCardStyling) {
+    if (cardBg && cardBg !== 'transparent') {
+      container.settings.background_background = 'classic';
+      container.settings.background_color = cardBg;
+    }
+    container.settings.border_radius = {
+      unit: 'px',
+      top: String(cardBr || 12),
+      right: String(cardBr || 12),
+      bottom: String(cardBr || 12),
+      left: String(cardBr || 12)
+    };
     container.settings.padding = {
       unit: 'px',
-      top: String(pTop),
-      bottom: String(pBottom),
-      left: String(pLeft),
-      right: String(pRight),
+      top: '32',
+      bottom: '32',
+      left: '28',
+      right: '28',
       isLinked: false
     };
-  }
-  if (s.boxShadow && s.boxShadow !== 'none') {
     container.settings.box_shadow_box_shadow = {
       horizontal: 0,
-      vertical: 8,
-      blur: 24,
+      vertical: 10,
+      blur: 30,
       spread: 0,
       color: 'rgba(0, 0, 0, 0.08)'
     };
   }
 
-  // Process inner children
-  const children = Array.from(el.children).filter(c => win.getComputedStyle(c).display !== 'none');
-  for (const child of children) {
-    const cs = win.getComputedStyle(child);
-    const cr = child.getBoundingClientRect();
-
-    // Overlap badge detection (e.g. icon badge overlapping card top border)
-    const isOverlapping = cr.top < (rect.top + 10) && cs.position === 'absolute';
-    const widget = buildLeafWidget(child, cs, cr, win, parseColor, generateId, getCleanText);
-
-    if (widget) {
-      if (isOverlapping) {
-        const overlapPx = Math.round(rect.top - cr.top);
-        if (overlapPx > 10) {
-          widget.settings.margin = {
-            unit: 'px',
-            top: String(-overlapPx),
-            bottom: '0',
-            left: '0',
-            right: '0',
-            isLinked: false
-          };
-        }
-      }
-      container.elements.push(widget);
-    } else if (child.children.length > 0) {
-      parseSubtreeRecursive(child, container, win, parseColor, parseBgImage, generateId, getCleanText);
-    }
-  }
+  // Extract all widgets directly inside this column/card
+  const widgets = extractWidgetsFromContainer(colEl, win, parseColor, generateId, getCleanText);
+  container.elements = widgets;
 
   return container;
 }
 
-function buildLeafWidget(el, s, rect, win, parseColor, generateId, getCleanText) {
-  const tag = el.tagName.toLowerCase();
-  const text = getCleanText(el);
-  const textColor = parseColor(s.color) || '#111827';
-  const fontSize = parseInt(s.fontSize) || 16;
-  const fontWeight = s.fontWeight || '400';
+function extractWidgetsFromContainer(parent, win, parseColor, generateId, getCleanText) {
+  const widgets = [];
 
-  // 1. Image Check (handles <img> or wrapped <div class="image"><img...>)
-  const imgEl = tag === 'img' ? el : el.querySelector('img');
-  if (imgEl && !el.querySelector('h1, h2, h3, h4, h5, h6, p')) {
+  // 1. Check for Image (single dominant image inside column)
+  const imgEl = parent.querySelector('img');
+  if (imgEl) {
     const src = imgEl.currentSrc || imgEl.src || imgEl.getAttribute('data-src') || imgEl.getAttribute('data-lazy-src') || imgEl.getAttribute('data-original');
-    if (src && !src.startsWith('data:image/svg') && !src.endsWith('.svg') && rect.width > 20 && rect.height > 20) {
-      return {
+    if (src && !src.startsWith('data:image/svg') && !src.endsWith('.svg')) {
+      widgets.push({
         id: generateId(),
         elType: 'widget',
         widgetType: 'image',
@@ -442,76 +338,115 @@ function buildLeafWidget(el, s, rect, win, parseColor, generateId, getCleanText)
           image_size: 'full',
           align: 'center'
         }
-      };
+      });
     }
   }
 
-  // 2. Heading
-  if (/^h[1-6]$/.test(tag) || (text.length > 0 && text.length < 90 && fontSize >= 20 && parseInt(fontWeight) >= 600)) {
-    return {
-      id: generateId(),
-      elType: 'widget',
-      widgetType: 'heading',
-      settings: {
-        title: text,
-        header_size: /^h[1-6]$/.test(tag) ? tag : 'h3',
-        title_color: textColor,
-        typography_typography: 'custom',
-        typography_font_size: { unit: 'px', size: fontSize },
-        typography_font_weight: fontWeight,
-        align: s.textAlign === 'center' ? 'center' : 'left'
-      }
-    };
-  }
-
-  // 3. Button
-  if (tag === 'button' || (tag === 'a' && (s.backgroundColor !== 'transparent' || el.className.includes('btn') || parseInt(s.paddingTop) >= 8))) {
-    const bg = parseColor(s.backgroundColor) || '#DD131A';
-    const br = parseInt(s.borderRadius) || 6;
-    return {
-      id: generateId(),
-      elType: 'widget',
-      widgetType: 'button',
-      settings: {
-        text: text || 'Explore More →',
-        link: { url: el.getAttribute('href') || '#' },
-        button_text_color: textColor || '#FFFFFF',
-        background_color: bg,
-        border_radius: { unit: 'px', top: br, right: br, bottom: br, left: br },
-        align: s.textAlign === 'center' ? 'center' : 'left'
-      }
-    };
-  }
-
-  // 4. Circular Icon / Badge
-  if (tag === 'svg' || el.className.includes('icon') || (rect.width <= 80 && rect.height <= 80 && (tag === 'i' || tag === 'span'))) {
-    return {
+  // 2. Check for Icon / Badge
+  const iconEl = parent.querySelector('svg, i[class*="fa"], span[class*="icon"], [class*="icon"]');
+  if (iconEl && !imgEl) {
+    const is = win.getComputedStyle(iconEl);
+    widgets.push({
       id: generateId(),
       elType: 'widget',
       widgetType: 'icon',
       settings: {
         selected_icon: { value: 'fas fa-shield-alt', library: 'fa-solid' },
-        primary_color: textColor || '#DD131A',
+        primary_color: parseColor(is.color) || '#DD131A',
         view: 'default'
       }
-    };
+    });
   }
 
-  // 5. Paragraph / Text
-  if (tag === 'p' || tag === 'li' || (text.length > 0 && el.children.length === 0)) {
-    return {
+  // 3. Check for Headings
+  const headings = parent.querySelectorAll('h1, h2, h3, h4, h5, h6, .title, .sub-title');
+  headings.forEach(h => {
+    if (h.closest('nav, .navigation, .main-menu, .navbar, .sub-menu, .submenu, .dropdown-menu, .menu-outer')) return;
+    const text = getCleanText(h);
+    if (!text || text.length > 120) return;
+    const hs = win.getComputedStyle(h);
+    widgets.push({
+      id: generateId(),
+      elType: 'widget',
+      widgetType: 'heading',
+      settings: {
+        title: text,
+        header_size: /^h[1-6]$/.test(h.tagName.toLowerCase()) ? h.tagName.toLowerCase() : 'h4',
+        title_color: parseColor(hs.color) || '#111827',
+        typography_typography: 'custom',
+        typography_font_size: { unit: 'px', size: parseInt(hs.fontSize) || 20 },
+        typography_font_weight: hs.fontWeight || '700',
+        align: hs.textAlign === 'center' ? 'center' : 'left'
+      }
+    });
+  });
+
+  // 4. Check for Paragraph / Text
+  const paragraphs = parent.querySelectorAll('p, li, .text, .desc');
+  paragraphs.forEach(p => {
+    // Skip navigation menus and dropdown submenus
+    if (p.closest('nav, .navigation, .main-menu, .navbar, .sub-menu, .submenu, .dropdown-menu, .menu-outer')) return;
+    const text = getCleanText(p);
+    if (!text || text.length > 500) return;
+    const ps = win.getComputedStyle(p);
+    widgets.push({
       id: generateId(),
       elType: 'widget',
       widgetType: 'text-editor',
       settings: {
-        editor: `<p>${el.innerHTML || text}</p>`,
-        text_color: textColor,
+        editor: `<p>${p.innerHTML || text}</p>`,
+        text_color: parseColor(ps.color) || '#6B7280',
         typography_typography: 'custom',
-        typography_font_size: { unit: 'px', size: fontSize },
-        align: s.textAlign === 'center' ? 'center' : 'left'
+        typography_font_size: { unit: 'px', size: parseInt(ps.fontSize) || 15 },
+        align: ps.textAlign === 'center' ? 'center' : 'left'
       }
-    };
+    });
+  });
+
+  // 5. Check for Buttons
+  const buttons = parent.querySelectorAll('a.theme-btn, a.btn, button, [role="button"], a[class*="link"], a[class*="btn"]');
+  buttons.forEach(btn => {
+    const text = getCleanText(btn);
+    if (!text || text.length > 35) return;
+    const bs = win.getComputedStyle(btn);
+    widgets.push({
+      id: generateId(),
+      elType: 'widget',
+      widgetType: 'button',
+      settings: {
+        text: text,
+        link: { url: btn.getAttribute('href') || '#' },
+        button_text_color: parseColor(bs.color) || '#FFFFFF',
+        background_color: parseColor(bs.backgroundColor) || '#DD131A',
+        border_radius: { unit: 'px', top: 6, right: 6, bottom: 6, left: 6 },
+        align: bs.textAlign === 'center' ? 'center' : 'left'
+      }
+    });
+  });
+
+  // 6. Check for Form Inputs / Select / Search
+  const inputs = parent.querySelectorAll('input:not([type="hidden"]), select, textarea');
+  if (inputs.length > 0 && !parent.querySelector('h1, h2, h3, h4, h5, h6, img')) {
+    const inputHtml = Array.from(inputs).map(inp => inp.outerHTML).join('\n');
+    widgets.push({
+      id: generateId(),
+      elType: 'widget',
+      widgetType: 'html',
+      settings: {
+        html: `<div style="width: 100%; display: flex; gap: 8px;">${inputHtml}</div>`
+      }
+    });
   }
 
-  return null;
+  return widgets;
+}
+
+function parseGenericBranch(node, container, win, parseColor, parseBgImage, generateId, getCleanText) {
+  const children = Array.from(node.children).filter(c => win.getComputedStyle(c).display !== 'none');
+  for (const child of children) {
+    const widgets = extractWidgetsFromContainer(child, win, parseColor, generateId, getCleanText);
+    if (widgets.length > 0) {
+      container.elements.push(...widgets);
+    }
+  }
 }
