@@ -1,0 +1,1091 @@
+{
+  "version": "0.4",
+  "title": "Rulify Consulting Demo",
+  "type": "page",
+  "content": [
+    {
+      "id": "e177000",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "a2053f1",
+          "elType": "container",
+          "isInner": true,
+          "settings": {
+            "container_type": "flex",
+            "content_width": "full",
+            "flex_direction": "column",
+            "margin": {
+              "unit": "px",
+              "top": "0",
+              "right": "0",
+              "bottom": "20",
+              "left": "0",
+              "isLinked": false
+            }
+          },
+          "elements": [
+            {
+              "id": "1b53796",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Home",
+                "link": {
+                  "url": "#"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "b9d2b05",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "About",
+                "link": {
+                  "url": "#"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "fb87d31",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Cases",
+                "link": {
+                  "url": "#"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "ab76252",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Services",
+                "link": {
+                  "url": "#"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "5437fff",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Blog",
+                "link": {
+                  "url": "#"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "07eec15",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Contact",
+                "link": {
+                  "url": "https://demo.themeim.com/wp/rulify/contact/"
+                }
+              },
+              "elements": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c41e903",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "3fae45a",
+          "elType": "container",
+          "isInner": true,
+          "settings": {
+            "container_type": "flex",
+            "content_width": "full",
+            "flex_direction": "column",
+            "margin": {
+              "unit": "px",
+              "top": "0",
+              "right": "0",
+              "bottom": "20",
+              "left": "0",
+              "isLinked": false
+            }
+          },
+          "elements": [
+            {
+              "id": "16446d7",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Home",
+                "link": {
+                  "url": "#"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "64d5716",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "About",
+                "link": {
+                  "url": "#"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "ef4ec05",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Cases",
+                "link": {
+                  "url": "#"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "1ddb25b",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Services",
+                "link": {
+                  "url": "#"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "91e86dd",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Blog",
+                "link": {
+                  "url": "#"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "941af5d",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Contact",
+                "link": {
+                  "url": "https://demo.themeim.com/wp/rulify/contact/"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "9a36377",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>999999 Bosan Road, New York, USA</p>"
+              },
+              "elements": []
+            },
+            {
+              "id": "de12011",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "+(00) 999 - 000 - 999",
+                "link": {
+                  "url": "tel:http://+(00)%20999%20-%20000%20-%20999"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "0842b7f",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "help@example.com",
+                "link": {
+                  "url": "mailto:http://help@example.com"
+                }
+              },
+              "elements": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "9c28652",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "f046375",
+          "elType": "widget",
+          "widgetType": "image",
+          "settings": {
+            "image": {
+              "url": "https://demo.themeim.com/wp/rulify/wp-content/uploads/2024/09/chat-image.jpg"
+            }
+          },
+          "elements": []
+        }
+      ]
+    },
+    {
+      "id": "7ef3e7f",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "276519c",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Find specialist Now!",
+            "header_size": "h3"
+          },
+          "elements": []
+        }
+      ]
+    },
+    {
+      "id": "747fce6",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "6f8034d",
+          "elType": "container",
+          "isInner": true,
+          "settings": {
+            "container_type": "flex",
+            "content_width": "full",
+            "flex_direction": "column",
+            "margin": {
+              "unit": "px",
+              "top": "0",
+              "right": "0",
+              "bottom": "20",
+              "left": "0",
+              "isLinked": false
+            }
+          },
+          "elements": [
+            {
+              "id": "f56dec4",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Reason to Chose Us",
+                "header_size": "h2"
+              },
+              "elements": []
+            },
+            {
+              "id": "acb431b",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Corporate Compliance",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "f90e7a8",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Intellectual Property Law",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "3a58d07",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Commercial Arbitration",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "31a50c9",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Corporate Compliance",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "25e0b8a",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Intellectual Property Law",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "5c536f9",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Commercial Arbitration",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "fcaa915",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Corporate Compliance",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "2981b6c",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Intellectual Property Law",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "36eb8d1",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Commercial Arbitration",
+                "header_size": "h4"
+              },
+              "elements": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f3b1359",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "538fe82",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Our Story in Intellectual Property",
+            "header_size": "h2"
+          },
+          "elements": []
+        },
+        {
+          "id": "9f5e27d",
+          "elType": "widget",
+          "widgetType": "text-editor",
+          "settings": {
+            "editor": "<p>We are a team of the dedicated patent professionals, united by our commitment toour excellence patent protection. With years of collective experience acros diverse industries team of this dedicated patent professionals, united by our</p>"
+          },
+          "elements": []
+        }
+      ]
+    },
+    {
+      "id": "61097be",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "4a86162",
+          "elType": "container",
+          "isInner": true,
+          "settings": {
+            "container_type": "flex",
+            "content_width": "full",
+            "flex_direction": "column",
+            "margin": {
+              "unit": "px",
+              "top": "0",
+              "right": "0",
+              "bottom": "20",
+              "left": "0",
+              "isLinked": false
+            }
+          },
+          "elements": [
+            {
+              "id": "29fb950",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Explore Creative Legal  Protections",
+                "header_size": "h2"
+              },
+              "elements": []
+            },
+            {
+              "id": "f411d83",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Corporate Compliance",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "c3105f5",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>Our team comprises seasoned patent professionals with years of experience across industries.</p>"
+              },
+              "elements": []
+            },
+            {
+              "id": "8e756fe",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Know More",
+                "link": {
+                  "url": "https://demo.themeim.com/wp/rulify/service/corporate-compliance/"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "3e5c3c8",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Intellectual Property Law",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "e2fbf5b",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>Our team comprises seasoned patent professionals with years of experience across industries.</p>"
+              },
+              "elements": []
+            },
+            {
+              "id": "6836762",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Know More",
+                "link": {
+                  "url": "https://demo.themeim.com/wp/rulify/service/intellectual-property-law/"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "0147a23",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Commercial Arbitration",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "3632c54",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>Our team comprises seasoned patent professionals with years of experience across industries.</p>"
+              },
+              "elements": []
+            },
+            {
+              "id": "1eb5f83",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Know More",
+                "link": {
+                  "url": "https://demo.themeim.com/wp/rulify/service/commercial-arbitration/"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "d8eb2de",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Regulatory Affairs",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "d8179a2",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>Our team comprises seasoned patent professionals with years of experience across industries.</p>"
+              },
+              "elements": []
+            },
+            {
+              "id": "4bf1b19",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Know More",
+                "link": {
+                  "url": "https://demo.themeim.com/wp/rulify/service/regulatory-affairs/"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "2f0301d",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Brand Protection",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "a6e74b3",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>Our team comprises seasoned patent professionals with years of experience across industries.</p>"
+              },
+              "elements": []
+            },
+            {
+              "id": "57f02b5",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Know More",
+                "link": {
+                  "url": "https://demo.themeim.com/wp/rulify/service/brand-protection/"
+                }
+              },
+              "elements": []
+            },
+            {
+              "id": "54c8322",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Employment Law Advisory",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "797f398",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>Our team comprises seasoned patent professionals with years of experience across industries.</p>"
+              },
+              "elements": []
+            },
+            {
+              "id": "2a89870",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Know More",
+                "link": {
+                  "url": "https://demo.themeim.com/wp/rulify/service/employment-law-advisory/"
+                }
+              },
+              "elements": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "36d1423",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "23f2dcb",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "expert team members",
+            "header_size": "h2"
+          },
+          "elements": []
+        }
+      ]
+    },
+    {
+      "id": "6e482dc",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "25a0487",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Get a Free Quote",
+            "header_size": "h2"
+          },
+          "elements": []
+        },
+        {
+          "id": "e9159f8",
+          "elType": "widget",
+          "widgetType": "text-editor",
+          "settings": {
+            "editor": "<p>Δ</p>"
+          },
+          "elements": []
+        },
+        {
+          "id": "c0e70e3",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Frequently Asked Question.",
+            "header_size": "h2"
+          },
+          "elements": []
+        },
+        {
+          "id": "3952f33",
+          "elType": "widget",
+          "widgetType": "text-editor",
+          "settings": {
+            "editor": "<p>We are a team of dedicated patent professional united by our commitment to excellence.</p>"
+          },
+          "elements": []
+        }
+      ]
+    },
+    {
+      "id": "e1882e3",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "1cdf67a",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Explore Our Latest Case\nStudies",
+            "header_size": "h2"
+          },
+          "elements": []
+        }
+      ]
+    },
+    {
+      "id": "99fe8fc",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "0c1c8ac",
+          "elType": "container",
+          "isInner": true,
+          "settings": {
+            "container_type": "flex",
+            "content_width": "full",
+            "flex_direction": "column",
+            "margin": {
+              "unit": "px",
+              "top": "0",
+              "right": "0",
+              "bottom": "20",
+              "left": "0",
+              "isLinked": false
+            }
+          },
+          "elements": [
+            {
+              "id": "edc1a8d",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Our Patent Acquisition  Process",
+                "header_size": "h2"
+              },
+              "elements": []
+            },
+            {
+              "id": "93780e3",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Content Creation",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "a6f11be",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>Our teams do so comprises seasoned professional with experience.</p>"
+              },
+              "elements": []
+            },
+            {
+              "id": "54b42de",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Registration",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "13e647d",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>Our teams do so comprises seasoned professional with experience.</p>"
+              },
+              "elements": []
+            },
+            {
+              "id": "2097c17",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Monitoring",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "56aa9d8",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>Our teams do so comprises seasoned professional with experience.</p>"
+              },
+              "elements": []
+            },
+            {
+              "id": "1df615c",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Licensing",
+                "header_size": "h4"
+              },
+              "elements": []
+            },
+            {
+              "id": "edc7c79",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>Our teams do so comprises seasoned professional with experience.</p>"
+              },
+              "elements": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1051817",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "5cd85ea",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Latest News & Articles  From the Blog",
+            "header_size": "h2"
+          },
+          "elements": []
+        },
+        {
+          "id": "8fa6dab",
+          "elType": "widget",
+          "widgetType": "button",
+          "settings": {
+            "text": "More Blog \n\t\t\t\t\t\t\t\tMore Blog",
+            "link": {
+              "url": "#"
+            }
+          },
+          "elements": []
+        }
+      ]
+    },
+    {
+      "id": "cf17483",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "0a3def3",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Lets Get Stared with Us. Call Us Now!",
+            "header_size": "h2"
+          },
+          "elements": []
+        }
+      ]
+    },
+    {
+      "id": "2b48d55",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "flex",
+        "content_width": "boxed",
+        "flex_direction": "column",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "right": "20",
+          "bottom": "60",
+          "left": "20",
+          "isLinked": false
+        }
+      },
+      "elements": [
+        {
+          "id": "6a4b9b1",
+          "elType": "widget",
+          "widgetType": "button",
+          "settings": {
+            "text": "Lawlify",
+            "link": {
+              "url": "#"
+            }
+          },
+          "elements": []
+        }
+      ]
+    }
+  ],
+  "page_settings": {
+    "page_layout": "elementor_header_footer"
+  }
+}

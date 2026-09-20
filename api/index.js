@@ -1,4 +1,4 @@
-import { HtmlConverterEngine } from '../converter.js';
+import { CleanConverterEngine } from '../converter.js';
 
 export default async function handler(req, res) {
   // CORS headers
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'HTML content is required.' });
     }
 
-    const template = HtmlConverterEngine.convert(html, builder, { title });
+    const template = CleanConverterEngine.convert(html, builder, { title });
 
     return res.status(200).json({
       success: true,
