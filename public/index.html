@@ -337,10 +337,26 @@
         </label>
       </div>
 
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">
+          🌐 Option 1: Live Demo URL (ThemeForest, Envato, or Any Website)
+        </label>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="url" id="urlInput" placeholder="https://demo.themeim.com/wp/rulify/ or any ThemeForest demo link..." style="flex: 1; background: #0D131F; border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; color: var(--text); font-size: 0.9rem; outline: none;">
+          <button type="button" id="scanUrlBtn" style="background: rgba(59, 130, 246, 0.2); border: 1px solid var(--primary); color: #60A5FA; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 700; cursor: pointer; white-space: nowrap;">Fetch & Scan</button>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1rem; margin: 0.25rem 0;">
+        <div style="flex: 1; height: 1px; background: var(--border);"></div>
+        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">OR</span>
+        <div style="flex: 1; height: 1px; background: var(--border);"></div>
+      </div>
+
       <div class="dropzone" id="dropzone">
         <input type="file" id="fileInput" accept=".html,.htm,.txt,.zip" style="display:none;">
         <div class="dropzone-icon">📁</div>
-        <div class="dropzone-text">Click to upload or drag & drop HTML or ZIP file</div>
+        <div class="dropzone-text">Option 2: Click to upload or drag & drop HTML or ZIP file</div>
         <div class="dropzone-sub">ThemeForest index.html, Save All Resources .zip, or View-Source</div>
       </div>
 
@@ -351,7 +367,7 @@
 
       <div class="textarea-wrap">
         <div class="textarea-label">
-          <span>Or Paste HTML Code Directly</span>
+          <span>Option 3: Or Paste HTML Code Directly</span>
           <span id="charCount">0 chars</span>
         </div>
         <textarea id="htmlPaste" placeholder="Paste <html> ... </html> source code here..."></textarea>
@@ -375,11 +391,25 @@
         </div>
         <div style="font-size:0.85rem; color:var(--text-muted);" id="resultMeta"></div>
       </div>
+
+      <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(30, 41, 59, 0.4); border: 1px dashed var(--border); border-radius: 12px;">
+        <div style="font-size: 0.85rem; font-weight: 700; color: #60A5FA; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span>🛡️ Cloudflare or Bot Protected Demo? Use 1-Tap Browser Scanner</span>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; margin: 0 0 0.75rem 0;">
+          If a ThemeForest site blocks automated server scraping with Captcha or Cloudflare, open the site in your browser on any device (phone, tablet, or laptop), and click this bookmarklet:
+        </p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <a href="javascript:(function(){const t=document.title||'Scanned Template';const h=document.documentElement.outerHTML;alert('⚡ Theme2Builder: Capturing live layout for '+t+'...');fetch('https://theme-to-builder-converter.vercel.app/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:h,builder:'elementor',title:t})}).then(r=>r.json()).then(d=>{if(d.success){const b=new Blob([JSON.stringify(d.template,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='elementor-'+t.replace(/[^a-zA-Z0-9]/g,'_')+'.json';a.click();alert('✅ Downloaded Elementor Template JSON!');}else{alert('Error: '+d.error);}}).catch(e=>alert('Error: '+e.message));})();" style="display: inline-block; background: #2563EB; color: #FFFFFF; font-size: 0.8rem; font-weight: 700; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; border: 1px solid #3B82F6;" title="Drag to bookmarks bar or tap">
+            ⭐ 1-Tap Scanner Bookmarklet (Drag to Bookmarks)
+          </a>
+        </div>
+      </div>
     </div>
   </main>
 
   <footer>
-    Theme2Builder &copy; 2026 · Built for autonomous WordPress conversion.
+    Theme2Builder &copy; 2026 · Built for autonomous WordPress conversion across all devices.
   </footer>
 
   <script>
@@ -396,8 +426,11 @@
     const charCount = document.getElementById('charCount');
     const convertBtn = document.getElementById('convertBtn');
     const resultBox = document.getElementById('resultBox');
+    const resultSummary = document.getElementById('resultSummary');
     const resultMeta = document.getElementById('resultMeta');
     const downloadBtn = document.getElementById('downloadBtn');
+    const urlInput = document.getElementById('urlInput');
+    const scanUrlBtn = document.getElementById('scanUrlBtn');
 
     // Builder Selection
     document.querySelectorAll('.builder-option').forEach(label => {
@@ -449,6 +482,50 @@
       }
     });
 
+    // Live URL Scan Click
+    scanUrlBtn.addEventListener('click', async () => {
+      const url = urlInput.value.trim();
+      if (!url || !url.startsWith('http')) {
+        alert('Please enter a valid website URL starting with https:// or http://');
+        return;
+      }
+
+      scanUrlBtn.disabled = true;
+      scanUrlBtn.innerHTML = 'Scanning Live Page...';
+      convertBtn.disabled = true;
+      resultBox.style.display = 'none';
+
+      try {
+        const response = await fetch('/api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: url,
+            builder: currentBuilder,
+            title: new URL(url).hostname
+          })
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Live URL scan failed');
+        }
+
+        convertedJson = data.template;
+        const count = currentBuilder === 'elementor' ? data.template.content.length : data.template.data.length;
+
+        resultSummary.textContent = `Live Site Converted Successfully!`;
+        resultMeta.textContent = `Extracted ${count} root ${currentBuilder === 'elementor' ? 'Flexbox containers' : 'Divi sections'} with authentic multi-column grids, typography, and images.`;
+        resultBox.style.display = 'block';
+      } catch (err) {
+        alert('Live Scan Error: ' + err.message + '\n\nTip: If the site is protected by Cloudflare bot protection, use the 1-Tap Browser Scanner bookmarklet below or upload the HTML/ZIP directly.');
+      } finally {
+        scanUrlBtn.disabled = false;
+        scanUrlBtn.innerHTML = 'Fetch & Scan';
+        convertBtn.disabled = false;
+      }
+    });
+
     // Convert Click
     convertBtn.addEventListener('click', async () => {
       let htmlContent = '';
@@ -456,10 +533,22 @@
       if (selectedFile) {
         if (selectedFile.name.endsWith('.zip')) {
           convertBtn.disabled = true;
-          convertBtn.innerHTML = '<span>Extracting ZIP file...</span>';
+          convertBtn.innerHTML = '<span>Extracting ZIP archive & CSS...</span>';
           try {
             const zip = new JSZip();
             const zipData = await zip.loadAsync(selectedFile);
+            
+            // Collect all CSS stylesheets inside the zip
+            let combinedCss = '';
+            for (const [filename, fileObj] of Object.entries(zipData.files)) {
+              if (filename.toLowerCase().endsWith('.css') && !fileObj.dir) {
+                try {
+                  const cssText = await fileObj.async('string');
+                  combinedCss += '\n' + cssText;
+                } catch {}
+              }
+            }
+
             // Search for primary html file (index.html or largest .html)
             let htmlFile = null;
             let maxHtmlSize = 0;
@@ -480,6 +569,9 @@
               throw new Error('No .html file found inside the uploaded ZIP archive.');
             }
             htmlContent = await htmlFile.async('string');
+            if (combinedCss.trim()) {
+              htmlContent = `<style>${combinedCss}</style>\n` + htmlContent;
+            }
           } catch (zipErr) {
             alert('ZIP Read Error: ' + zipErr.message);
             convertBtn.disabled = false;
@@ -522,6 +614,7 @@
         convertedJson = data.template;
         const count = currentBuilder === 'elementor' ? data.template.content.length : data.template.data.length;
 
+        resultSummary.textContent = `Template Converted Successfully!`;
         resultMeta.textContent = `Generated ${count} root ${currentBuilder === 'elementor' ? 'Flexbox containers' : 'Divi sections'} in 100% native format. Ready for import.`;
         resultBox.style.display = 'block';
       } catch (err) {

@@ -17,13 +17,20 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { html, builder = 'elementor', title = 'Converted Theme Template' } = req.body;
+    const { html, url, builder = 'elementor', title = 'Converted Theme Template' } = req.body;
 
-    if (!html || typeof html !== 'string' || html.trim().length === 0) {
-      return res.status(400).json({ error: 'HTML content is required.' });
+    let targetHtml = html;
+
+    if (url && typeof url === 'string' && url.startsWith('http')) {
+      console.log('[API] Processing Live URL scan:', url);
+      targetHtml = await CleanConverterEngine.fetchAndConsolidate(url);
     }
 
-    const template = CleanConverterEngine.convert(html, builder, { title });
+    if (!targetHtml || typeof targetHtml !== 'string' || targetHtml.trim().length === 0) {
+      return res.status(400).json({ error: 'HTML content or a valid URL is required.' });
+    }
+
+    const template = CleanConverterEngine.convert(targetHtml, builder, { title });
 
     return res.status(200).json({
       success: true,
