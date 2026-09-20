@@ -195,16 +195,50 @@ function parseSubtreeRecursive(node, targetContainer, win, parseColor, parseBgIm
     return;
   }
 
-  // Check for multi-column row grouping
+  // Check if this container is a multi-column row (e.g. .row, display: flex, or multiple columns)
+  const nodeStyle = win.getComputedStyle(node);
+  const isRowContainer = node.classList.contains('row') || nodeStyle.display === 'flex' || children.some(c => c.className.includes('col-'));
+
+  if (isRowContainer && children.length > 1) {
+    // Treat all children as flex columns in a row
+    const rowContainer = {
+      id: generateId(),
+      elType: 'container',
+      settings: {
+        content_width: 'full',
+        flex_direction: 'row',
+        flex_wrap: 'wrap',
+        justify_content: 'space-between',
+        align_items: 'stretch',
+        gap: { unit: 'px', size: 24 },
+        width: { unit: '%', size: 100 }
+      },
+      elements: []
+    };
+
+    const parentWidth = node.getBoundingClientRect().width || 1200;
+
+    for (const colItem of children) {
+      const colRect = colItem.getBoundingClientRect();
+      let colPercent = calculateColumnWidth(colItem, colRect.width, parentWidth);
+
+      const colContainer = buildFlexContainer(colItem, colPercent, win, parseColor, parseBgImage, generateId, getCleanText);
+      rowContainer.elements.push(colContainer);
+    }
+    targetContainer.elements.push(rowContainer);
+    return;
+  }
+
+  // Otherwise group children by horizontal rows based on top coordinate
   const rows = groupChildrenIntoRows(children, win);
 
   for (const row of rows) {
     if (row.length > 1) {
-      // Row container
       const rowContainer = {
         id: generateId(),
         elType: 'container',
         settings: {
+          content_width: 'full',
           flex_direction: 'row',
           flex_wrap: 'wrap',
           justify_content: 'space-between',
@@ -219,19 +253,13 @@ function parseSubtreeRecursive(node, targetContainer, win, parseColor, parseBgIm
 
       for (const colItem of row) {
         const colRect = colItem.getBoundingClientRect();
-        let colPercent = Math.min(100, Math.max(15, Math.round((colRect.width / parentWidth) * 100)));
-        // Snap common percentages
-        if (colPercent >= 45 && colPercent <= 55) colPercent = 50;
-        else if (colPercent >= 30 && colPercent <= 36) colPercent = 33.333;
-        else if (colPercent >= 22 && colPercent <= 27) colPercent = 25;
-        else if (colPercent >= 64 && colPercent <= 69) colPercent = 66.666;
+        let colPercent = calculateColumnWidth(colItem, colRect.width, parentWidth);
 
         const colContainer = buildFlexContainer(colItem, colPercent, win, parseColor, parseBgImage, generateId, getCleanText);
         rowContainer.elements.push(colContainer);
       }
       targetContainer.elements.push(rowContainer);
     } else {
-      // Single element
       const single = row[0];
       const s = win.getComputedStyle(single);
       const isCard = checkIsVisualCard(single, s, parseColor);
@@ -251,6 +279,24 @@ function parseSubtreeRecursive(node, targetContainer, win, parseColor, parseBgIm
   }
 }
 
+function calculateColumnWidth(el, widthPx, parentWidthPx) {
+  const cls = el.className || '';
+  if (cls.includes('col-lg-4') || cls.includes('col-md-4')) return 31;
+  if (cls.includes('col-lg-6') || cls.includes('col-md-6')) return 48;
+  if (cls.includes('col-lg-3') || cls.includes('col-md-3')) return 23;
+  if (cls.includes('col-lg-8') || cls.includes('col-md-8')) return 64;
+  if (cls.includes('col-lg-7') || cls.includes('col-md-7')) return 56;
+  if (cls.includes('col-lg-5') || cls.includes('col-md-5')) return 40;
+  if (cls.includes('col-lg-12') || cls.includes('col-md-12')) return 100;
+
+  const ratio = widthPx / (parentWidthPx || 1200);
+  if (ratio >= 0.28 && ratio <= 0.38) return 31;
+  if (ratio >= 0.44 && ratio <= 0.56) return 48;
+  if (ratio >= 0.20 && ratio <= 0.27) return 23;
+  if (ratio >= 0.60 && ratio <= 0.70) return 64;
+  return Math.min(100, Math.max(15, Math.round(ratio * 100)));
+}
+
 function groupChildrenIntoRows(elements, win) {
   const rows = [];
   let currentRow = [];
@@ -265,7 +311,6 @@ function groupChildrenIntoRows(elements, win) {
       const prev = currentRow[currentRow.length - 1];
       const prevRect = prev.getBoundingClientRect();
 
-      // If top offsets are within 30px, they are horizontally aligned
       if (Math.abs(rect.top - prevRect.top) < 30 && rect.left > prevRect.left) {
         currentRow.push(el);
       } else {
@@ -304,6 +349,8 @@ function buildFlexContainer(el, widthPercent, win, parseColor, parseBgImage, gen
     settings: {
       flex_direction: 'column',
       width: { unit: '%', size: widthPercent },
+      flex_grow: 0,
+      flex_shrink: 0,
       gap: { unit: 'px', size: 16 }
     },
     elements: []
@@ -341,7 +388,7 @@ function buildFlexContainer(el, widthPercent, win, parseColor, parseBgImage, gen
     };
   }
 
-  // Check for floating badges and child content
+  // Process inner children
   const children = Array.from(el.children).filter(c => win.getComputedStyle(c).display !== 'none');
   for (const child of children) {
     const cs = win.getComputedStyle(child);
@@ -381,7 +428,25 @@ function buildLeafWidget(el, s, rect, win, parseColor, generateId, getCleanText)
   const fontSize = parseInt(s.fontSize) || 16;
   const fontWeight = s.fontWeight || '400';
 
-  // 1. Heading
+  // 1. Image Check (handles <img> or wrapped <div class="image"><img...>)
+  const imgEl = tag === 'img' ? el : el.querySelector('img');
+  if (imgEl && !el.querySelector('h1, h2, h3, h4, h5, h6, p')) {
+    const src = imgEl.currentSrc || imgEl.src || imgEl.getAttribute('data-src') || imgEl.getAttribute('data-lazy-src') || imgEl.getAttribute('data-original');
+    if (src && !src.startsWith('data:image/svg') && !src.endsWith('.svg') && rect.width > 20 && rect.height > 20) {
+      return {
+        id: generateId(),
+        elType: 'widget',
+        widgetType: 'image',
+        settings: {
+          image: { url: src, id: '' },
+          image_size: 'full',
+          align: 'center'
+        }
+      };
+    }
+  }
+
+  // 2. Heading
   if (/^h[1-6]$/.test(tag) || (text.length > 0 && text.length < 90 && fontSize >= 20 && parseInt(fontWeight) >= 600)) {
     return {
       id: generateId(),
@@ -394,12 +459,12 @@ function buildLeafWidget(el, s, rect, win, parseColor, generateId, getCleanText)
         typography_typography: 'custom',
         typography_font_size: { unit: 'px', size: fontSize },
         typography_font_weight: fontWeight,
-        align: s.textAlign === 'center' ? 'center' : (s.textAlign === 'right' ? 'right' : 'left')
+        align: s.textAlign === 'center' ? 'center' : 'left'
       }
     };
   }
 
-  // 2. Button
+  // 3. Button
   if (tag === 'button' || (tag === 'a' && (s.backgroundColor !== 'transparent' || el.className.includes('btn') || parseInt(s.paddingTop) >= 8))) {
     const bg = parseColor(s.backgroundColor) || '#DD131A';
     const br = parseInt(s.borderRadius) || 6;
@@ -416,22 +481,6 @@ function buildLeafWidget(el, s, rect, win, parseColor, generateId, getCleanText)
         align: s.textAlign === 'center' ? 'center' : 'left'
       }
     };
-  }
-
-  // 3. Image
-  if (tag === 'img') {
-    const src = el.src || el.getAttribute('src');
-    if (src && !src.endsWith('.svg') && rect.width > 20 && rect.height > 20) {
-      return {
-        id: generateId(),
-        elType: 'widget',
-        widgetType: 'image',
-        settings: {
-          image: { url: src, id: '' },
-          image_size: 'full'
-        }
-      };
-    }
   }
 
   // 4. Circular Icon / Badge
