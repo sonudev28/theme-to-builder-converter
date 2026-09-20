@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     :root {
       --bg: #0B0F17;
@@ -337,10 +338,10 @@
       </div>
 
       <div class="dropzone" id="dropzone">
-        <input type="file" id="fileInput" accept=".html,.htm,.txt" style="display:none;">
+        <input type="file" id="fileInput" accept=".html,.htm,.txt,.zip" style="display:none;">
         <div class="dropzone-icon">📁</div>
-        <div class="dropzone-text">Click to upload or drag & drop HTML file</div>
-        <div class="dropzone-sub">ThemeForest index.html, View-Source, or downloaded resources</div>
+        <div class="dropzone-text">Click to upload or drag & drop HTML or ZIP file</div>
+        <div class="dropzone-sub">ThemeForest index.html, Save All Resources .zip, or View-Source</div>
       </div>
 
       <div class="file-chosen-banner" id="fileBanner">
@@ -453,13 +454,47 @@
       let htmlContent = '';
 
       if (selectedFile) {
-        htmlContent = await selectedFile.text();
+        if (selectedFile.name.endsWith('.zip')) {
+          convertBtn.disabled = true;
+          convertBtn.innerHTML = '<span>Extracting ZIP file...</span>';
+          try {
+            const zip = new JSZip();
+            const zipData = await zip.loadAsync(selectedFile);
+            // Search for primary html file (index.html or largest .html)
+            let htmlFile = null;
+            let maxHtmlSize = 0;
+            for (const [filename, fileObj] of Object.entries(zipData.files)) {
+              if (filename.toLowerCase().endsWith('.html') || filename.toLowerCase().endsWith('.htm')) {
+                if (filename.toLowerCase().includes('index.html') || filename.toLowerCase().includes('demo')) {
+                  htmlFile = fileObj;
+                  break;
+                }
+                const content = await fileObj.async('string');
+                if (content.length > maxHtmlSize) {
+                  maxHtmlSize = content.length;
+                  htmlFile = fileObj;
+                }
+              }
+            }
+            if (!htmlFile) {
+              throw new Error('No .html file found inside the uploaded ZIP archive.');
+            }
+            htmlContent = await htmlFile.async('string');
+          } catch (zipErr) {
+            alert('ZIP Read Error: ' + zipErr.message);
+            convertBtn.disabled = false;
+            convertBtn.innerHTML = '<span>Convert to Template</span><span>→</span>';
+            return;
+          }
+        } else {
+          htmlContent = await selectedFile.text();
+        }
       } else {
         htmlContent = htmlPaste.value.trim();
       }
 
       if (!htmlContent) {
-        alert('Please select an HTML file or paste source code first.');
+        alert('Please select an HTML or ZIP file, or paste source code first.');
         return;
       }
 
