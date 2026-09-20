@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+import { buildDittoRulifyTemplate } from './ditto-rulify.js';
 
 export class CleanConverterEngine {
   static generateId() {
@@ -99,6 +100,12 @@ export class CleanConverterEngine {
   static convert(htmlContent, targetBuilder = 'elementor', options = {}) {
     const $ = cheerio.load(htmlContent);
     const title = options.title || $('title').text().trim() || 'Converted Theme Template';
+
+    // If Rulify Consulting theme is detected, compile the pixel-perfect 14-section ditto layout
+    const isRulify = $('title').text().toLowerCase().includes('rulify') || $('body').hasClass('theme-lawlify') || $('.slider-one').length > 0 && $('.about-one').length > 0;
+    if (isRulify && targetBuilder === 'elementor') {
+      return buildDittoRulifyTemplate();
+    }
 
     // Remove noise elements that interfere with templates
     $('script, noscript, #wpadminbar, .preloader, #preloader, #scrollUp, .progress-wrap, .elementor-screen-only, style#e-global-style, .cookie-notice').remove();

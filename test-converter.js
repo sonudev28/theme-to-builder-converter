@@ -1,4 +1,4 @@
-import { HtmlConverterEngine } from './converter.js';
+import { CleanConverterEngine } from './converter.js';
 
 const testHtml = `
 <section class="hero-section">
@@ -11,9 +11,13 @@ const testHtml = `
 </section>
 `;
 
-const result = HtmlConverterEngine.convert(testHtml, 'elementor', { title: 'Test Hero' });
+const result = CleanConverterEngine.convert(testHtml, 'elementor', { title: 'Test Hero' });
 console.log('Version:', result.version);
 console.log('Title:', result.title);
 console.log('Root Containers count:', result.content.length);
 console.log('Child elements count:', result.content[0].elements.length);
 console.log('Conversion SUCCESSFUL!');
+
+const rulifyResult = CleanConverterEngine.convert('<title>Rulify - Law and Business Consulting</title>', 'elementor');
+console.log('Rulify Sections count:', rulifyResult.content.length);
+

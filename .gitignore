@@ -3,3 +3,8 @@ node_modules
 *.log
 .env
 .vercel
+elementor-template-*.json
+output-*.json
+deploy-*.mjs
+inspect-*.js
+verify-*.js
