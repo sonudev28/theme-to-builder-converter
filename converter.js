@@ -168,8 +168,19 @@ export class CleanConverterEngine {
   }
 
   static buildSectionContainer($, $sec) {
+    const tag = $sec.get(0).tagName.toLowerCase();
     const cls = ($sec.attr('class') || '').toLowerCase();
     const styleAttr = $sec.attr('style') || '';
+
+    // Special handler for <header> navbar
+    if (tag === 'header' || cls.includes('header')) {
+      return this.buildHeaderSection($, $sec);
+    }
+
+    // Special handler for client / partner logos strip
+    if (cls.includes('clients') || cls.includes('partners') || cls.includes('brand-one')) {
+      return this.buildClientsSection($, $sec);
+    }
 
     // Detect background image
     let bgImage = null;
@@ -226,8 +237,9 @@ export class CleanConverterEngine {
     }
 
     // 2. Identify Rows or Card Grids
+    // Note: use .swiper-wrapper directly so individual slides become distinct cards
     const rows = [];
-    $sec.find('.row, .elementor-row, .swiper-wrapper, [class*="services-"]:has([class*="block"]), [class*="team-"]:has([class*="block"]), [class*="pricing-"]:has([class*="block"]), [class*="projects-"]:has([class*="block"])').each((_, rEl) => {
+    $sec.find('.swiper-wrapper, .row, .elementor-row').each((_, rEl) => {
       const $r = $(rEl);
       if ($r.parents('.__t2b_processed').length > 0) return;
       rows.push($r);
@@ -273,6 +285,198 @@ export class CleanConverterEngine {
     }
 
     return sectionContainer;
+  }
+
+  static buildHeaderSection($, $header) {
+    const logoSrc = $header.find('.logo img, a img').first().attr('src') || '';
+    const navItems = $header.find('.navigation > li > a, nav > ul > li > a').map((_, a) => $(a).text().trim()).get();
+    const btnText = $header.find('.btn-box a, .outer-box a, .header-btn a, a.theme-btn').first().text().trim() || 'Get a Quote';
+    const btnHref = $header.find('.btn-box a, .outer-box a, .header-btn a, a.theme-btn').first().attr('href') || '#contact';
+
+    const headerSection = {
+      id: this.generateId(),
+      elType: 'container',
+      isInner: false,
+      settings: {
+        container_type: 'flex',
+        content_width: 'boxed',
+        flex_direction: 'column',
+        padding: { unit: 'px', top: '20', right: '20', bottom: '20', left: '20', isLinked: false },
+        background_background: 'classic',
+        background_color: '#FFFFFF'
+      },
+      elements: [
+        {
+          id: this.generateId(),
+          elType: 'container',
+          isInner: true,
+          settings: {
+            container_type: 'flex',
+            content_width: 'full',
+            flex_direction: 'row',
+            flex_justify_content: 'space-between',
+            flex_align_items: 'center'
+          },
+          elements: [
+            // Logo Container
+            {
+              id: this.generateId(),
+              elType: 'container',
+              isInner: true,
+              settings: {
+                container_type: 'flex',
+                content_width: 'full',
+                width: { unit: '%', size: 25 },
+                flex_direction: 'column'
+              },
+              elements: logoSrc ? [
+                {
+                  id: this.generateId(),
+                  elType: 'widget',
+                  widgetType: 'image',
+                  settings: {
+                    image: { url: logoSrc },
+                    image_size: 'full',
+                    align: 'left'
+                  },
+                  elements: []
+                }
+              ] : []
+            },
+            // Nav Links / Items Container
+            {
+              id: this.generateId(),
+              elType: 'container',
+              isInner: true,
+              settings: {
+                container_type: 'flex',
+                content_width: 'full',
+                width: { unit: '%', size: 50 },
+                flex_direction: 'row',
+                flex_justify_content: 'center',
+                gap: { unit: 'px', size: 20 }
+              },
+              elements: (navItems.length > 0 ? navItems.slice(0, 6) : ['Home', 'About', 'Services', 'Contact']).map(item => ({
+                id: this.generateId(),
+                elType: 'widget',
+                widgetType: 'heading',
+                settings: {
+                  title: item,
+                  header_size: 'span',
+                  title_color: '#141B27',
+                  typography_typography: 'custom',
+                  typography_font_size: { unit: 'px', size: 15 },
+                  typography_font_weight: '600'
+                },
+                elements: []
+              }))
+            },
+            // Button Container
+            {
+              id: this.generateId(),
+              elType: 'container',
+              isInner: true,
+              settings: {
+                container_type: 'flex',
+                content_width: 'full',
+                width: { unit: '%', size: 20 },
+                flex_direction: 'column',
+                flex_align_items: 'flex-end'
+              },
+              elements: [
+                {
+                  id: this.generateId(),
+                  elType: 'widget',
+                  widgetType: 'button',
+                  settings: {
+                    text: btnText,
+                    link: { url: btnHref },
+                    background_color: '#DD131A',
+                    button_text_color: '#FFFFFF',
+                    border_radius: { unit: 'px', top: '6', right: '6', bottom: '6', left: '6', isLinked: true },
+                    padding: { unit: 'px', top: '10', right: '20', bottom: '10', left: '20', isLinked: false }
+                  },
+                  elements: []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
+    return headerSection;
+  }
+
+  static buildClientsSection($, $sec) {
+    const logos = [];
+    $sec.find('img').each((_, img) => {
+      const src = $(img).attr('src');
+      if (src && !src.includes('data:image/svg')) {
+        logos.push(src);
+      }
+    });
+
+    if (logos.length === 0) return null;
+
+    const uniqueLogos = Array.from(new Set(logos)).slice(0, 6);
+    const colWidth = Math.floor(100 / uniqueLogos.length) - 2;
+
+    return {
+      id: this.generateId(),
+      elType: 'container',
+      isInner: false,
+      settings: {
+        container_type: 'flex',
+        content_width: 'boxed',
+        flex_direction: 'column',
+        padding: { unit: 'px', top: '40', right: '20', bottom: '40', left: '20', isLinked: false },
+        background_background: 'classic',
+        background_color: '#F8FAFC'
+      },
+      elements: [
+        {
+          id: this.generateId(),
+          elType: 'container',
+          isInner: true,
+          settings: {
+            container_type: 'flex',
+            content_width: 'full',
+            flex_direction: 'row',
+            flex_wrap: 'wrap',
+            flex_justify_content: 'space-between',
+            flex_align_items: 'center',
+            gap: { unit: 'px', size: 20 }
+          },
+          elements: uniqueLogos.map(logoUrl => ({
+            id: this.generateId(),
+            elType: 'container',
+            isInner: true,
+            settings: {
+              container_type: 'flex',
+              content_width: 'full',
+              width: { unit: '%', size: colWidth },
+              flex_direction: 'column',
+              flex_align_items: 'center'
+            },
+            elements: [
+              {
+                id: this.generateId(),
+                elType: 'widget',
+                widgetType: 'image',
+                settings: {
+                  image: { url: logoUrl },
+                  image_size: 'full',
+                  align: 'center',
+                  opacity: { unit: 'px', size: 0.7 }
+                },
+                elements: []
+              }
+            ]
+          }))
+        }
+      ]
+    };
   }
 
   static buildTitleBlock($, $titleBlock, isDark) {
@@ -393,6 +597,10 @@ export class CleanConverterEngine {
 
     if (cols.length === 0) return null;
 
+    // Limit cards per row to maximum 6 to prevent overwhelming layouts
+    const visibleCols = cols.slice(0, 6);
+    const totalCols = visibleCols.length;
+
     const rowContainer = {
       id: this.generateId(),
       elType: 'container',
@@ -408,28 +616,21 @@ export class CleanConverterEngine {
       elements: []
     };
 
-    const totalCols = cols.length;
-    for (const colEl of cols) {
+    for (const colEl of visibleCols) {
       const $col = $(colEl);
       const colCls = ($col.attr('class') || '').toLowerCase();
 
       let widthPercent = 100;
-      if (colCls.includes('col-lg-4') || colCls.includes('col-md-4') || colCls.includes('col-4')) {
+      if (colCls.includes('col-lg-4') || colCls.includes('col-md-4') || colCls.includes('col-4') || totalCols === 3) {
         widthPercent = 33.333;
-      } else if (colCls.includes('col-lg-6') || colCls.includes('col-md-6') || colCls.includes('col-6')) {
+      } else if (colCls.includes('col-lg-6') || colCls.includes('col-md-6') || colCls.includes('col-6') || totalCols === 2) {
         widthPercent = 50;
-      } else if (colCls.includes('col-lg-3') || colCls.includes('col-md-3') || colCls.includes('col-3')) {
+      } else if (colCls.includes('col-lg-3') || colCls.includes('col-md-3') || colCls.includes('col-3') || totalCols === 4) {
         widthPercent = 25;
       } else if (colCls.includes('col-lg-8') || colCls.includes('col-md-8')) {
         widthPercent = 66.667;
       } else if (colCls.includes('col-lg-12') || colCls.includes('col-12')) {
         widthPercent = 100;
-      } else if (totalCols === 3) {
-        widthPercent = 33.333;
-      } else if (totalCols === 4) {
-        widthPercent = 25;
-      } else if (totalCols === 2) {
-        widthPercent = 50;
       }
 
       let calcWidth = widthPercent;
@@ -437,7 +638,7 @@ export class CleanConverterEngine {
       else if (widthPercent === 25) calcWidth = 23;
       else if (widthPercent === 50) calcWidth = 48;
 
-      const isCard = colCls.includes('block') || colCls.includes('card') || colCls.includes('item') || $col.find('[class*="block"], [class*="inner"]').length > 0;
+      const isCard = colCls.includes('block') || colCls.includes('card') || colCls.includes('item') || colCls.includes('slide') || $col.find('[class*="block"], [class*="inner"]').length > 0;
 
       const colSettings = {
         container_type: 'flex',
@@ -485,12 +686,12 @@ export class CleanConverterEngine {
       elements: []
     };
 
-    const count = cards.length;
+    const count = Math.min(cards.length, 6);
     let widthPercent = 31;
     if (count === 2) widthPercent = 48;
     if (count >= 4) widthPercent = 23;
 
-    cards.each((_, el) => {
+    cards.slice(0, count).each((_, el) => {
       const $card = $(el);
       const colContainer = {
         id: this.generateId(),
